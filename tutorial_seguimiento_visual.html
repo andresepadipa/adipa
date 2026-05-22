@@ -1,0 +1,279 @@
+
+<style>
+  .tut-wrap { font-size: 14px; padding: 0 0 2rem; }
+  .tut-header { margin-bottom: 1.5rem; }
+  .tut-header h2 { font-size: 18px; font-weight: 500; margin: 0 0 4px; color: var(--color-text-primary); }
+  .tut-header p { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+  .steps-nav { display: flex; align-items: center; gap: 0; margin-bottom: 1.5rem; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .step-dot { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; min-width: 52px; }
+  .step-dot .dot { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--color-text-secondary); transition: all .2s; }
+  .step-dot.active .dot { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+  .step-dot.done .dot { background: var(--color-background-success); color: var(--color-text-success); border-color: var(--color-border-success); }
+  .step-dot .dot-label { font-size: 10px; color: var(--color-text-tertiary); text-align: center; max-width: 52px; line-height: 1.2; }
+  .step-dot.active .dot-label { color: var(--color-text-info); }
+  .step-connector { flex: 1; height: 0.5px; background: var(--color-border-tertiary); min-width: 8px; margin-bottom: 18px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .card-header { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .badge { font-size: 11px; font-weight: 400; padding: 2px 8px; border-radius: var(--border-radius-md); background: var(--color-background-info); color: var(--color-text-info); }
+  .badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+  .badge-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .sub-steps { list-style: none; padding: 0; margin: 0; }
+  .sub-steps li { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; color: var(--color-text-secondary); align-items: flex-start; line-height: 1.5; }
+  .sub-steps li .num { min-width: 20px; height: 20px; border-radius: 50%; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); margin-top: 1px; flex-shrink: 0; }
+  .tip { background: var(--color-background-warning); border-left: 2px solid var(--color-border-warning); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 8px 12px; margin: 10px 0 0; font-size: 12px; color: var(--color-text-warning); line-height: 1.5; }
+  .tip-green { background: var(--color-background-success); border-left: 2px solid var(--color-border-success); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 8px 12px; margin: 10px 0 0; font-size: 12px; color: var(--color-text-success); line-height: 1.5; }
+  .img-wrap { position: relative; margin: 12px 0; border-radius: var(--border-radius-md); overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
+  .img-wrap img { width: 100%; display: block; }
+  .img-caption { font-size: 11px; color: var(--color-text-tertiary); padding: 6px 10px; background: var(--color-background-secondary); }
+  .annotation { position: absolute; pointer-events: none; }
+  .ann-circle { position: absolute; border-radius: 50%; border: 2px solid #E24B4A; pointer-events: none; }
+  .ann-arrow { position: absolute; pointer-events: none; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); margin-right: 4px; }
+  .tag-blue { background: var(--color-background-info); color: var(--color-text-info); }
+  .tag-green { background: var(--color-background-success); color: var(--color-text-success); }
+  .tag-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .tag-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  .msg-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .msg-table th { text-align: left; color: var(--color-text-tertiary); font-weight: 400; padding: 4px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .msg-table td { padding: 5px 8px; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: middle; }
+  .msg-table tr:last-child td { border-bottom: none; }
+  .nav-btns { display: flex; justify-content: space-between; margin-top: 1rem; }
+  .nav-btns button { padding: 6px 18px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; }
+  .nav-btns button:hover { background: var(--color-background-secondary); }
+  .nav-btns button.primary { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+  #step-content { animation: fadein .2s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  strong.hl { color: var(--color-text-primary); }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 12px 0; }
+</style>
+
+<div class="tut-wrap">
+  <div class="tut-header">
+    <h2>Tutorial: Seguimiento diario de leads pendientes</h2>
+    <p>Flujo completo con referencias visuales — navega paso a paso.</p>
+  </div>
+
+  <div class="steps-nav" id="steps-nav">
+    <div class="step-dot active" onclick="goTo(0)" id="dot-0"><div class="dot">1</div><div class="dot-label">Verificar filtro</div></div>
+    <div class="step-connector"></div>
+    <div class="step-dot" onclick="goTo(1)" id="dot-1"><div class="dot">2</div><div class="dot-label">Revisar mensajes</div></div>
+    <div class="step-connector"></div>
+    <div class="step-dot" onclick="goTo(2)" id="dot-2"><div class="dot">3</div><div class="dot-label">Sin mensaje</div></div>
+    <div class="step-connector"></div>
+    <div class="step-dot" onclick="goTo(3)" id="dot-3"><div class="dot">4</div><div class="dot-label">Solo correo</div></div>
+    <div class="step-connector"></div>
+    <div class="step-dot" onclick="goTo(4)" id="dot-4"><div class="dot">5</div><div class="dot-label">Enviar WA</div></div>
+    <div class="step-connector"></div>
+    <div class="step-dot" onclick="goTo(5)" id="dot-5"><div class="dot">6</div><div class="dot-label">Actualizar</div></div>
+    <div class="step-connector"></div>
+    <div class="step-dot" onclick="goTo(6)" id="dot-6"><div class="dot">7</div><div class="dot-label">Verificar 0</div></div>
+  </div>
+
+  <div id="step-content"></div>
+
+  <div class="nav-btns">
+    <button id="btn-prev" onclick="prev()">← Anterior</button>
+    <button id="btn-next" class="primary" onclick="next()">Siguiente →</button>
+  </div>
+</div>
+
+<script>
+const IMG = {
+  f1: "/mnt/user-data/uploads/1779486887773_image.png",
+  f2: "/mnt/user-data/uploads/1779486964363_image.png",
+  f3: "/mnt/user-data/uploads/1779487004904_image.png",
+  f4: "/mnt/user-data/uploads/1779487060233_image.png",
+  f5: "/mnt/user-data/uploads/1779487106213_image.png",
+  f6: "/mnt/user-data/uploads/1779487232819_image.png",
+  f7: "/mnt/user-data/uploads/1779487303825_image.png",
+  f8: "/mnt/user-data/uploads/1779487426255_image.png",
+  f9: "/mnt/user-data/uploads/1779487495135_image.png"
+};
+
+function img(src, caption) {
+  return `<div class="img-wrap"><img src="${src}" loading="lazy"/><div class="img-caption">${caption}</div></div>`;
+}
+
+const steps = [
+  {
+    title: "Verificar filtro de fecha en HubSpot",
+    badge: "HubSpot",
+    html: `
+      <div class="card">
+        <ul class="sub-steps">
+          <li><span class="num">1</span><span>Ir a <strong class="hl">Negocios → pestaña "Pendientes Andrea"</strong> (marcada en rojo).</span></li>
+          <li><span class="num">2</span><span>Hacer clic en <strong class="hl">Filtros avanzados</strong> (arriba a la derecha de la lista).</span></li>
+          <li><span class="num">3</span><span>En el panel que se abre, ir al <strong class="hl">Grupo 1</strong> y verificar que el filtro <em>Fecha de próximo contacto</em> diga <span class="tag tag-blue">Hoy</span>.</span></li>
+          <li><span class="num">4</span><span>Si aparece una fecha fija, hacer clic en el botón <strong class="hl">Hoy</strong> del calendario para actualizarla (marcado en rojo en la imagen).</span></li>
+        </ul>
+        ${img(IMG.f1, "Vista Pendientes Andrea → Filtros avanzados → Grupo 1 → verificar fecha = Hoy")}
+        <div class="tip">⚠ Este filtro no se actualiza solo. Debe verificarse manualmente cada día antes de comenzar.</div>
+      </div>
+    `
+  },
+  {
+    title: "Ordenar por mensajes y detectar vacíos",
+    badge: "HubSpot",
+    html: `
+      <div class="card">
+        <ul class="sub-steps">
+          <li><span class="num">1</span><span>En la lista de negocios, hacer clic en el encabezado <strong class="hl">Mensajes</strong> para ordenar de menor a mayor (flecha hacia arriba).</span></li>
+          <li><span class="num">2</span><span>Los negocios que aparecen primero con <span class="tag tag-gray">—</span> o sin valor son los que <strong class="hl">no tienen mensaje asignado</strong> todavía.</span></li>
+          <li><span class="num">3</span><span>Anotar o identificar esos negocios antes de continuar.</span></li>
+        </ul>
+        ${img(IMG.f2, "Clic en columna 'Mensajes' para ordenar — los sin mensaje quedan primero")}
+        <div class="tip">💡 Mapear primero todos los leads sin mensaje antes de hacer el envío masivo.</div>
+      </div>
+    `
+  },
+  {
+    title: "Investigar leads sin mensaje (con teléfono)",
+    badge: "Treble",
+    html: `
+      <div class="card">
+        <ul class="sub-steps">
+          <li><span class="num">1</span><span>En la fila del negocio sin mensaje, hacer clic derecho sobre el número de teléfono → <strong class="hl">Copiar</strong>.</span></li>
+        </ul>
+        ${img(IMG.f3, "Clic derecho sobre el teléfono → Copiar")}
+        <hr class="divider"/>
+        <ul class="sub-steps">
+          <li><span class="num">2</span><span>Ir a <strong class="hl">Treble → Contacts</strong> y pegar el número en el buscador.</span></li>
+          <li><span class="num">3</span><span>Abrir la conversación del contacto y revisar el historial para identificar el <strong class="hl">último mensaje enviado</strong>.</span></li>
+        </ul>
+        ${img(IMG.f4, "Treble → Contacts → buscar número → revisar historial de conversación")}
+        <hr class="divider"/>
+        <ul class="sub-steps">
+          <li><span class="num">4</span><span>Volver a HubSpot y actualizar el campo <span class="tag tag-blue">Mensajes</span> con el número que corresponde al próximo envío.</span></li>
+        </ul>
+        ${img(IMG.f5, "HubSpot → campo Mensajes → seleccionar el mensaje que corresponde enviar hoy")}
+      </div>
+    `
+  },
+  {
+    title: "Leads sin teléfono: seguimiento por correo",
+    badge: "Gmail / HubSpot",
+    html: `
+      <div class="card">
+        <ul class="sub-steps">
+          <li><span class="num">1</span><span><strong class="hl">Opción A — Desde HubSpot:</strong> abrir el contacto → pestaña <em>Actividades</em> → sección <strong class="hl">Correos</strong> (marcada en rojo). Ver el último correo enviado.</span></li>
+        </ul>
+        ${img(IMG.f6, "HubSpot → Contacto → Actividades → Correos → ver último correo enviado")}
+        <hr class="divider"/>
+        <ul class="sub-steps">
+          <li><span class="num">2</span><span><strong class="hl">Opción B — Desde Gmail:</strong> buscar el correo del contacto y revisar el hilo. Puedes usar <strong class="hl">Gemini</strong> (ícono ✦ marcado con flecha) para redactar el seguimiento automáticamente.</span></li>
+          <li><span class="num">3</span><span>Escribir la instrucción a Gemini: <em>"ayúdame a hacer un seguimiento a este correo que no me respondieron"</em> → revisar borrador → enviar.</span></li>
+        </ul>
+        ${img(IMG.f7, "Gmail → Gemini (ícono ✦) → pedir borrador de seguimiento → revisar y enviar")}
+        <div class="tip">💡 Para estos contactos, en HubSpot el campo Mensajes no aplica. Solo actualizar la <span class="tag tag-blue">Fecha de próximo contacto</span> con la próxima fecha de seguimiento.</div>
+      </div>
+    `
+  },
+  {
+    title: "Envío masivo por WhatsApp con la extensión",
+    badge: "HubSpot + Treble",
+    html: `
+      <div class="card">
+        <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 10px">Repetir este proceso para cada número de mensaje: 6 → 5 → 4 → 3 → 2 → 1.</p>
+        <ul class="sub-steps">
+          <li><span class="num">1</span><span>En <strong class="hl">Filtros avanzados → Grupo 1</strong>, agregar filtro <em>Mensajes</em> y seleccionar el número a enviar (ej: <span class="tag tag-blue">Mensaje 6</span>).</span></li>
+        </ul>
+        ${img(IMG.f8, "Filtros avanzados → agregar filtro Mensajes → seleccionar Mensaje 6 (luego repetir con 5, 4, 3...)")}
+        <hr class="divider"/>
+        <ul class="sub-steps">
+          <li><span class="num">2</span><span>Seleccionar todos los negocios filtrados → hacer clic en la <strong class="hl">extensión de Treble</strong>.</span></li>
+          <li><span class="num">3</span><span>En el modal verificar: nombre del flujo <span class="tag tag-blue">Flujo mensaje X - Andrea</span>, número de envío correcto, variables <span class="tag tag-green">Nombre del contacto</span> + <span class="tag tag-green">Nombre del programa</span> activas, tipo de envío <span class="tag tag-blue">Programado</span>.</span></li>
+          <li><span class="num">4</span><span>Confirmar fecha/hora → <strong class="hl">Enviar</strong>.</span></li>
+        </ul>
+        ${img(IMG.f9, "Modal Treble: verificar flujo, número, variables y programar envío")}
+        <div class="tip">⚠ Siempre verificar que las variables {{name}} y {{program_name}} estén marcadas antes de enviar.</div>
+      </div>
+    `
+  },
+  {
+    title: "Actualizar estado post-envío",
+    badge: "HubSpot",
+    html: `
+      <div class="card">
+        <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 10px">Después de cada envío, actualizar etapa del pipeline, mensaje y fecha según la regla:</p>
+        <table class="msg-table">
+          <thead>
+            <tr>
+              <th>Mensajes enviados</th>
+              <th>Etapa del pipeline</th>
+              <th>Próximo mensaje</th>
+              <th>Próxima fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-warn">Mensaje 6</span><span class="tag tag-warn">Mensaje 3</span></td>
+              <td>→ <strong class="hl">Sin interacción</strong></td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">Mensaje 5</span><span class="tag tag-blue">Mensaje 4</span></td>
+              <td>Se mantiene</td>
+              <td>→ <span class="tag tag-blue">Mensaje 6</span></td>
+              <td>+2 días hábiles</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">Mensaje 1</span><span class="tag tag-green">Mensaje 2</span></td>
+              <td>Se mantiene</td>
+              <td>→ <span class="tag tag-blue">Mensaje 3</span></td>
+              <td>+2 días hábiles</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tip">⚠ Mensaje 6 y 3: revisar si algún negocio está en etapa "Interés web" y pasarlo manualmente a "Sin interacción".</div>
+      </div>
+    `
+  },
+  {
+    title: "Verificar que la vista quede en 0",
+    badge: "HubSpot",
+    html: `
+      <div class="card">
+        <ul class="sub-steps">
+          <li><span class="num">1</span><span>Volver a la vista <strong class="hl">"Pendientes Andrea"</strong> y verificar que muestre <strong class="hl">0 negocios</strong>.</span></li>
+          <li><span class="num">2</span><span>Si quedan leads, revisar si alguno tiene la fecha de próximo contacto o el mensaje sin actualizar.</span></li>
+        </ul>
+        <div class="tip-green">✅ Vista en 0 = todos los leads del día fueron contactados y actualizados correctamente. ¡Seguimiento completo!</div>
+      </div>
+    `
+  }
+];
+
+let current = 0;
+
+function render() {
+  const s = steps[current];
+  document.getElementById('step-content').innerHTML = `
+    <div class="card" style="border-color:var(--color-border-info);padding:0.75rem 1.25rem;margin-bottom:8px">
+      <div class="card-header">${s.title} <span class="badge">${s.badge}</span></div>
+    </div>
+    ${s.html}
+  `;
+  for (let i = 0; i < steps.length; i++) {
+    const d = document.getElementById('dot-' + i);
+    d.className = 'step-dot' + (i === current ? ' active' : i < current ? ' done' : '');
+  }
+  document.getElementById('btn-prev').style.visibility = current === 0 ? 'hidden' : 'visible';
+  const nb = document.getElementById('btn-next');
+  if (current === steps.length - 1) {
+    nb.textContent = '✓ Completado';
+    nb.className = 'primary';
+    nb.onclick = () => {};
+  } else {
+    nb.textContent = 'Siguiente →';
+    nb.className = 'primary';
+    nb.onclick = next;
+  }
+}
+
+function goTo(i) { current = i; render(); }
+function next() { if (current < steps.length - 1) { current++; render(); } }
+function prev() { if (current > 0) { current--; render(); } }
+
+render();
+</script>
