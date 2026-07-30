@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estado de Ventas Julio 2026 · ADIPA</title>
+<style>
+  :root{
+    --bg:#f6f5fb; --card:#ffffff; --ink:#1f1b2e; --muted:#6b6780;
+    --line:#e7e3f0; --accent:#6c3fd1; --accent-soft:#efe9fb;
+    --green:#1f9d6b; --amber:#e0952b; --red:#d64562; --blue:#2f6fd6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:28px 18px 60px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:22px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .tile .k{font-size:12px;color:var(--muted);margin-bottom:6px}
+  .tile .v{font-size:20px;font-weight:700;letter-spacing:-.3px}
+  .tile .v.small{font-size:17px}
+  .sec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 20px 8px;margin-bottom:22px}
+  .sec h2{font-size:15px;margin:0 0 4px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent)}
+  .sec p.note{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:right;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:600}
+  tbody tr:last-child td{border-bottom:none}
+  tr.total td{font-weight:700;border-top:2px solid var(--accent);background:var(--accent-soft)}
+  .name{font-weight:600}
+  .bar{height:7px;border-radius:5px;background:#ece8f4;overflow:hidden;margin-top:5px;min-width:90px}
+  .bar > span{display:block;height:100%;border-radius:5px}
+  .pct{font-weight:700}
+  .g{color:var(--green)} .a{color:var(--amber)} .r{color:var(--red)} .b{color:var(--blue)}
+  .chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+  .chip.g{background:#e3f4ec;color:var(--green)} .chip.a{background:#fbeed6;color:#a9701a} .chip.r{background:#fbe4ea;color:var(--red)}
+  .legend{font-size:11.5px;color:var(--muted);margin:2px 0 0}
+  .pos{color:var(--green);font-weight:600}
+  .foot{color:var(--muted);font-size:11.5px;margin-top:18px}
+  @media(max-width:640px){ th,td{padding:7px 5px;font-size:12px} .hideS{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Estado de Ventas · Julio 2026</h1>
+  <div class="sub">Metas y piso desde Monday · Ventas reales desde Reportes BI (Chile) — actualizado 30 jul 2026, 10:16 AM · cierre de mes</div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k">Venta actual (grupo)</div><div class="v">$280.036.506</div></div>
+    <div class="tile"><div class="k">Meta grupal</div><div class="v small">$350.780.452</div><div class="legend">avance <b class="a">79,8%</b></div></div>
+    <div class="tile"><div class="k">Piso grupal</div><div class="v small">$317.000.000</div><div class="legend">avance <b class="g">88,3%</b></div></div>
+    <div class="tile"><div class="k">Falta para meta</div><div class="v small r">$70.743.946</div></div>
+    <div class="tile"><div class="k">Falta para piso</div><div class="v small a">$36.963.494</div></div>
+  </div>
+
+  <div class="sec">
+    <h2>Detalle por ejecutiva / grupo</h2>
+    <p class="note">% calculado sobre la meta. Semáforo: <span class="chip g">≥90%</span> <span class="chip a">75–89%</span> <span class="chip r">&lt;75%</span></p>
+    <table>
+      <thead>
+        <tr><th>Grupo</th><th>Meta</th><th>Piso</th><th>Venta actual</th><th>% meta</th><th class="hideS">% piso</th><th>Falta meta</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">Andrea · general<div class="bar"><span style="width:62%;background:var(--red)"></span></div></td>
+          <td>$100.720.000</td><td>$81.000.000</td><td>$62.500.049</td>
+          <td class="pct r">62,1%</td><td class="hideS">77,2%</td><td>$38.219.951</td>
+        </tr>
+        <tr>
+          <td class="name">Andrea · Asincrónicos<div class="bar"><span style="width:74.5%;background:var(--amber)"></span></div></td>
+          <td>$38.000.000</td><td>$32.000.000</td><td>$28.325.153</td>
+          <td class="pct r">74,5%</td><td class="hideS">88,5%</td><td>$9.674.847</td>
+        </tr>
+        <tr>
+          <td class="name">Siria<div class="bar"><span style="width:96%;background:var(--green)"></span></div></td>
+          <td>$113.000.000</td><td>$113.000.000</td><td>$108.430.332</td>
+          <td class="pct g">96,0%</td><td class="hideS">96,0%</td><td>$4.569.668</td>
+        </tr>
+        <tr>
+          <td class="name">Claudia<div class="bar"><span style="width:86.9%;background:var(--amber)"></span></div></td>
+          <td>$33.030.226</td><td>$32.000.000</td><td>$28.715.303</td>
+          <td class="pct a">86,9%</td><td class="hideS">89,7%</td><td>$4.314.923</td>
+        </tr>
+        <tr>
+          <td class="name">Ada · Especializaciones<div class="bar"><span style="width:92.5%;background:var(--green)"></span></div></td>
+          <td>$30.000.000</td><td>$30.000.000</td><td>$27.750.666</td>
+          <td class="pct g">92,5%</td><td class="hideS">92,5%</td><td>$2.249.334</td>
+        </tr>
+        <tr>
+          <td class="name">Ada · Cursos<div class="bar"><span style="width:69.2%;background:var(--red)"></span></div></td>
+          <td>$31.030.226</td><td>$25.500.000</td><td>$21.477.359</td>
+          <td class="pct r">69,2%</td><td class="hideS">84,2%</td><td>$9.552.867</td>
+        </tr>
+        <tr>
+          <td class="name">Ada · Sesiones magistrales<div class="bar"><span style="width:56.8%;background:var(--red)"></span></div></td>
+          <td>$5.000.000</td><td>$3.500.000</td><td>$2.837.644</td>
+          <td class="pct r">56,8%</td><td class="hideS">81,1%</td><td>$2.162.356</td>
+        </tr>
+        <tr class="total">
+          <td>TOTAL GRUPO</td>
+          <td>$350.780.452</td><td>$317.000.000</td><td>$280.036.506</td>
+          <td>79,8%</td><td class="hideS">88,3%</td><td>$70.743.946</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend" style="margin-top:10px">* Especializaciones figura a nombre de "Natalie Hardy" en Reportes BI (error de nombre); corresponde al grupo <b>Ada · Especializaciones</b> de Monday.</p>
+  </div>
+
+  <div class="sec">
+    <h2>Proyección: reparto para llegar a la meta grupal</h2>
+    <p class="note">Idea: quienes están más cerca de su meta (Siria, Especializaciones, Claudia) empujan por encima de ella y ese excedente alivia a quien más le falta (Andrea general). La suma de las metas ajustadas sigue siendo la meta grupal: $350.780.452.</p>
+    <table>
+      <thead>
+        <tr><th>Grupo</th><th>Venta actual</th><th>Meta original</th><th>Meta ajustada</th><th>Falta vender</th><th class="hideS">vs meta orig.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="name">Andrea · general</td><td>$62.500.049</td><td>$100.720.000</td><td>$89.250.226</td><td>$26.750.177</td><td class="hideS pos">−$11.469.774</td></tr>
+        <tr><td class="name">Andrea · Asincrónicos</td><td>$28.325.153</td><td>$38.000.000</td><td>$38.000.000</td><td>$9.674.847</td><td class="hideS">—</td></tr>
+        <tr><td class="name">Siria</td><td>$108.430.332</td><td>$113.000.000</td><td>$118.000.000</td><td>$9.569.668</td><td class="hideS b">+$5.000.000</td></tr>
+        <tr><td class="name">Claudia</td><td>$28.715.303</td><td>$33.030.226</td><td>$36.500.000</td><td>$7.784.697</td><td class="hideS b">+$3.469.774</td></tr>
+        <tr><td class="name">Ada · Especializaciones</td><td>$27.750.666</td><td>$30.000.000</td><td>$33.000.000</td><td>$5.249.334</td><td class="hideS b">+$3.000.000</td></tr>
+        <tr><td class="name">Ada · Cursos</td><td>$21.477.359</td><td>$31.030.226</td><td>$31.030.226</td><td>$9.552.867</td><td class="hideS">—</td></tr>
+        <tr><td class="name">Ada · Sesiones magistrales</td><td>$2.837.644</td><td>$5.000.000</td><td>$5.000.000</td><td>$2.162.356</td><td class="hideS">—</td></tr>
+        <tr class="total"><td>TOTAL</td><td>$280.036.506</td><td>$350.780.452</td><td>$350.780.452</td><td>$70.743.946</td><td class="hideS">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">
+    <h2>Lectura rápida</h2>
+    <p class="note" style="margin-bottom:14px">
+      <b>Van muy bien (a un empujón de su meta):</b> Siria (96%), Ada·Especializaciones (92,5%) y Claudia (87%). Juntas les faltan solo ~$11,1M para cerrar sus metas — victorias rápidas.<br><br>
+      <b>Necesitan el mayor empuje:</b> Andrea·general (falta $38,2M, el hueco más grande del equipo), Ada·Cursos ($9,6M) y Andrea·Asincrónicos ($9,7M).<br><br>
+      <b>Prioridad realista de cierre de mes:</b> asegurar primero el <b>piso grupal</b> ($317M) — faltan $36,96M — y desde ahí estirar hacia la meta. La meta grupal completa exige $70,7M en los días que quedan, así que conviene concentrar el esfuerzo del equipo en Andrea·general y en cerrar las tres que están al 87–96%.
+    </p>
+  </div>
+
+  <div class="foot">Fuente: tablero Monday "Metas semanales - Julio" (metas y piso) y Reportes BI ADIPA · ventas-general, filtro País = Chile (ventas reales al 30 jul 2026, 10:16 AM). Las "metas ajustadas" son una propuesta de reparto, ajustable según la capacidad real de cada ejecutiva.</div>
+</div>
+</body>
+</html>
