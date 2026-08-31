@@ -275,7 +275,11 @@ function renderProy(){
       <td data-fv="${g.key}">${fv>0?CLP(fv):'<span class="good">cumplido</span>'}</td></tr>`;
   }).join('');
   document.getElementById('proy').innerHTML =
-    `<thead><tr><th>Grupo</th><th>Venta actual</th><th>Piso</th><th>Reajuste (editable)</th><th>Falta vender</th></tr></thead><tbody>${body}</tbody>`;
+    `<thead><tr><th>Grupo</th><th>Venta actual</th><th>Piso</th><th>Reajuste (editable)</th><th>Falta vender</th></tr></thead>
+     <tbody>${body}
+     <tr class="total"><td>GRUPO</td>
+       <td id="ptActual">—</td><td id="ptPiso">—</td><td id="ptReaj">—</td><td id="ptFalta">—</td></tr></tbody>`;
+  updateProyTotals();
   document.querySelectorAll('input.reaj').forEach(inp=>{
     inp.addEventListener('input',()=>{
       let v = parseInt(inp.value.replace(/[^\d]/g,''),10); if(isNaN(v)) v=0;
@@ -284,9 +288,23 @@ function renderProy(){
       const cell = document.querySelector(`[data-fv="${inp.dataset.k}"]`);
       const fv = v-g.actual;
       cell.innerHTML = fv>0?CLP(fv):'<span class="good">cumplido</span>';
-      updateCheck(); save();
+      updateProyTotals(); updateCheck(); save();
     });
   });
+}
+
+// Totales de la tabla de proyección. "Falta vender" suma solo los montos que faltan:
+// los grupos ya cumplidos aportan 0, no restan, para no esconder lo que queda por vender.
+function updateProyTotals(){
+  const filas = ALL();
+  const act = filas.reduce((a,g)=>a+(+g.actual||0),0);
+  const piso = filas.reduce((a,g)=>a+(+g.piso||0),0);
+  const rj = filas.reduce((a,g)=>a+(+reaj[g.key]||0),0);
+  const falta = filas.reduce((a,g)=>a+Math.max(0,(+reaj[g.key]||0)-(+g.actual||0)),0);
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('ptActual', CLP(act)); set('ptPiso', CLP(piso)); set('ptReaj', CLP(rj));
+  const el = document.getElementById('ptFalta');
+  if(el) el.innerHTML = falta>0 ? CLP(falta) : '<span class="good">cumplido</span>';
 }
 
 function updateCheck(){

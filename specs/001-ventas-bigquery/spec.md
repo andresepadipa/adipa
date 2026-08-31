@@ -13,7 +13,11 @@ reflejar ese ritmo sin intervención.
    calculados (`actual`, `meta`, `piso`) más la hora del corte.
 2. `index.html` pide `/api/ventas` al cargar, llena `BASE`, pone el badge de corte y
    renderiza. Se **refresca solo** cada 10 minutos y al volver a la pestaña.
-3. Todo lo demás sigue igual: tabla editable, "+ Agregar persona", proyección/reparto
+3. La tabla de proyección cierra con una fila **GRUPO** que totaliza venta actual, piso,
+   reajuste y **falta vender**. El total de "falta vender" suma solo lo que falta: los grupos
+   ya cumplidos aportan 0, no restan, para no esconder lo que queda por vender. Se recalcula
+   al editar cualquier reajuste.
+4. Todo lo demás sigue igual: tabla editable, "+ Agregar persona", proyección/reparto
    con aviso de descuadre, "Guardar reparto", toggle Meta/Piso, `localStorage`
    (`adipa-agosto-v2`).
 
