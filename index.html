@@ -1,3 +1,336 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estado de Ventas · Agosto 2026</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#0f2933; --muted:#5b6b73;
+  --line:#e3e8ec; --accent:#0e7c86; --accent-soft:#e2f1f2;
+  --good:#0f9d58; --good-soft:#e6f4ea; --warn:#c8791a; --warn-soft:#fbefdd;
+  --bad:#c62828; --bad-soft:#fbe6e6; --shadow:0 1px 3px rgba(15,41,51,.08),0 6px 24px rgba(15,41,51,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+header.top{margin-bottom:22px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:13.5px}
+.badge-cut{display:inline-block;margin-top:8px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;padding:4px 10px;border-radius:999px}
+
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0 8px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}
+.kpi .lab{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.kpi .val{font-size:20px;font-weight:700;margin-top:6px;letter-spacing:-.4px}
+.kpi .val.sm{font-size:18px}
+.kpi.brand{background:linear-gradient(135deg,#0e7c86,#0a5f67);border-color:transparent;color:#fff}
+.kpi.brand .lab{color:#bfe4e6}
+
+section{margin-top:30px}
+.h2row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;flex-wrap:wrap}
+h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0;font-weight:700}
+
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+th,td{padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{background:#eef2f4;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--line)}
+tbody tr+tr td{border-top:1px solid var(--line)}
+tbody tr.total td{background:#eef2f4;font-weight:700;border-top:2px solid #d3dbe0}
+tbody tr.extra td{background:var(--accent-soft)}
+.tblwrap{overflow-x:auto}
+.good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.tag{display:inline-block;font-size:10px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:0 5px;margin-left:6px;vertical-align:middle}
+
+input.cell,input.reaj{text-align:right;font:inherit;font-variant-numeric:tabular-nums;font-weight:600;
+  border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fbfdfd;color:var(--ink)}
+input.reaj{width:130px}
+input.cell{width:120px}
+input.name{width:170px;text-align:left;font:inherit;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fbfdfd;color:var(--ink)}
+input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:#fff}
+.rm{border:1px solid var(--line);background:var(--card);color:var(--bad);border-radius:8px;width:30px;height:30px;font-size:16px;line-height:1;cursor:pointer}
+.rm:hover{border-color:var(--bad);background:var(--bad-soft)}
+
+.editnote{font-size:12.5px;color:var(--muted);margin:-4px 0 14px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:transparent;padding:8px 14px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.primary:hover{color:#fff;opacity:.92}
+.checkbar{margin-top:14px;border-radius:14px;padding:16px 18px;display:flex;flex-wrap:wrap;gap:6px 26px;align-items:center;justify-content:space-between;font-weight:600;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow)}
+.checkbar .lab{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.checkbar .big{font-size:20px;letter-spacing:-.3px}
+.status{display:flex;align-items:center;gap:10px;font-size:15px}
+.dot{width:12px;height:12px;border-radius:50%}
+.st-good{background:var(--good-soft)} .st-good .dot{background:var(--good)} .st-good .txt{color:var(--good)}
+.st-warn{background:var(--warn-soft)} .st-warn .dot{background:var(--warn)} .st-warn .txt{color:var(--warn)}
+.checkbar.st-good,.checkbar.st-warn{border-color:transparent}
+
+.lectura{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);font-size:14.2px}
+.lectura ul{margin:8px 0 0;padding-left:20px} .lectura li{margin:5px 0}
+.foot{color:var(--muted);font-size:12px;margin-top:26px;text-align:center}
+.empty{color:var(--muted);font-size:13px;padding:6px 2px}
+
+@media(max-width:820px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:520px){ .kpis{grid-template-columns:1fr} }
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1618; --card:#152124; --ink:#e7eef0; --muted:#93a5ab;
+    --line:#25353a; --accent:#3fb6bf; --accent-soft:#173237;
+    --good:#4ecb8a; --good-soft:#122a20; --warn:#e0a15a; --warn-soft:#2c2113;
+    --bad:#ef6d6d; --bad-soft:#2c1616; --shadow:0 1px 3px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.3);
+  }
+  :root:not([data-theme="light"]) thead th,:root:not([data-theme="light"]) tbody tr.total td{background:#1b292d}
+  :root:not([data-theme="light"]) input.cell,:root:not([data-theme="light"]) input.reaj,:root:not([data-theme="light"]) input.name{background:#0f1a1d}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Estado de Ventas · Agosto 2026</h1>
+    <div class="sub">ADIPA · grupos comerciales · comparativo contra metas y pisos de agosto (Monday)</div>
+    <span class="badge-cut">Corte 31-ago 09:17 · sin Batería Evalúa</span>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <div class="h2row"><h2>Detalle por ejecutiva / grupo</h2></div>
+    <div class="tblwrap"><table id="detalle"></table></div>
+  </section>
+
+  <section>
+    <div class="h2row">
+      <h2>Personas agregadas manualmente</h2>
+      <button class="btn primary" id="addPerson">+ Agregar persona</button>
+    </div>
+    <p class="editnote">Suma una persona nueva al grupo con sus propios montos (nombre, venta, meta y piso, todos editables). Se incluye en los totales de arriba y en la proyección de abajo.</p>
+    <div id="extrasArea"></div>
+  </section>
+
+  <section>
+    <div class="h2row"><h2>Proyección: reparto para llegar a la meta grupal</h2></div>
+    <p class="editnote">Los montos de <strong>reajuste</strong> son editables — cambia cualquiera y la barra de abajo avisa al instante si hay descuadre contra el objetivo grupal. Tus cambios quedan guardados en este navegador.</p>
+    <div class="controls">
+      <span style="font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Objetivo:</span>
+      <div class="seg" id="objseg">
+        <button data-obj="meta" class="on">Meta grupal</button>
+        <button data-obj="piso">Piso grupal</button>
+      </div>
+      <button class="btn" id="fillMeta">Igualar a metas</button>
+      <button class="btn" id="fillPiso">Igualar a pisos</button>
+      <button class="btn" id="reset">Restablecer</button>
+    </div>
+    <div class="tblwrap"><table id="proy"></table></div>
+    <div class="checkbar" id="check">
+      <div><div class="lab">Suma de reajustes</div><div class="big" id="sumReaj">—</div></div>
+      <div><div class="lab" id="objLab">Objetivo · Meta grupal</div><div class="big" id="objVal">—</div></div>
+      <div class="status" id="statusBox"><span class="dot"></span><span class="txt" id="statusTxt">—</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h2row"><h2>Lectura rápida</h2></div>
+    <div class="lectura" id="lectura"></div>
+  </section>
+
+  <div class="foot">Datos: Reportes BI ADIPA (/ventas-general) · Metas: Monday «Metas semanales - Agosto» · Total excluye categoría «Batería Evalúa».</div>
+</div>
+
+<script>
+const CLP = n => '$' + new Intl.NumberFormat('es-CL').format(Math.round(n||0));
+const M = n => '$' + ((n||0)/1e6).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2}) + 'M';
+
+// ---- Datos base de agosto (corte 31-ago 09:17, sin Batería Evalúa) ----
+const BASE = [
+  {key:'ag', label:'Andrea · General',              actual:87151647,  meta:105610000, piso:94000000},
+  {key:'aa', label:'Andrea · Asincrónicos',         actual:28370901,  meta:36305000,  piso:33000000},
+  {key:'si', label:'Siria',                          actual:99939820,  meta:102305000, piso:102305000},
+  {key:'cl', label:'Claudia',                        actual:27476881,  meta:31322500,  piso:29500000},
+  {key:'es', label:'Ada · Especializaciones',        actual:23484426,  meta:31305000,  piso:29000000},
+  {key:'cu', label:'Ada · Cursos',                   actual:27698768,  meta:28152000,  piso:29000000},
+  {key:'se', label:'Ada · Sesiones magistrales',     actual:2690604,   meta:5000000,   piso:2800000},
+];
+
+let extras = [];          // {key,label,actual,meta,piso}  (personas manuales)
+let reaj = {};            // key -> monto reajuste editable
+let objetivo = 'meta';
+
+const ALL = () => BASE.concat(extras);
+const TOT = k => ALL().reduce((a,g)=>a+(+g[k]||0),0);
+
+// ---- persistencia ----
+const LS = 'adipa-agosto-v2';
+function load(){
+  try{ const s = JSON.parse(localStorage.getItem(LS)||'null');
+    if(s){ extras = s.extras||[]; reaj = s.reaj||{}; objetivo = s.objetivo||'meta'; return true; } }catch(e){}
+  return false;
+}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify({extras,reaj,objetivo})); }catch(e){} }
+function seed(field){ ALL().forEach(g=> reaj[g.key]=g[field]); }
+function ensureReaj(){ ALL().forEach(g=>{ if(reaj[g.key]==null) reaj[g.key]=g.meta; }); }
+
+function pctColor(p){ return p>=100?'good':(p>=90?'warn':'bad'); }
+
+// ---- KPIs ----
+function renderKPIs(){
+  const A=TOT('actual'), Me=TOT('meta'), Pi=TOT('piso');
+  const pM=Me?A/Me*100:0, pP=Pi?A/Pi*100:0;
+  document.getElementById('kpis').innerHTML = [
+    ['brand','Venta actual grupo', M(A)],
+    ['','Meta grupal', M(Me)],
+    ['','Piso grupal', M(Pi)],
+    ['','% Meta', pM.toFixed(1)+'%'],
+    ['','% Piso', pP.toFixed(1)+'%'],
+  ].map(([c,l,v])=>`<div class="kpi ${c}"><div class="lab">${l}</div><div class="val ${v.length>7?'sm':''}">${v}</div></div>`).join('');
+}
+
+// ---- Detalle ----
+function renderDetalle(){
+  const rows = ALL().map(g=>{
+    const pm=g.meta?g.actual/g.meta*100:0, pp=g.piso?g.actual/g.piso*100:0, falta=Math.max(0,g.meta-g.actual);
+    const isX = extras.includes(g);
+    return `<tr class="${isX?'extra':''}">
+      <td>${g.label}${isX?'<span class="tag">manual</span>':''}</td>
+      <td>${CLP(g.meta)}</td><td>${CLP(g.piso)}</td><td>${CLP(g.actual)}</td>
+      <td class="${pctColor(pm)}">${pm.toFixed(1)}%</td>
+      <td class="${pctColor(pp)}">${pp.toFixed(1)}%</td>
+      <td>${falta>0?CLP(falta):'—'}</td></tr>`;
+  }).join('');
+  const A=TOT('actual'), Me=TOT('meta'), Pi=TOT('piso');
+  const pm=Me?A/Me*100:0, pp=Pi?A/Pi*100:0;
+  document.getElementById('detalle').innerHTML =
+    `<thead><tr><th>Grupo</th><th>Meta</th><th>Piso</th><th>Venta actual</th><th>% Meta</th><th>% Piso</th><th>Falta a meta</th></tr></thead>
+     <tbody>${rows}
+     <tr class="total"><td>GRUPO</td><td>${CLP(Me)}</td><td>${CLP(Pi)}</td><td>${CLP(A)}</td>
+       <td class="${pctColor(pm)}">${pm.toFixed(1)}%</td><td class="${pctColor(pp)}">${pp.toFixed(1)}%</td>
+       <td>${CLP(Math.max(0,Me-A))}</td></tr></tbody>`;
+}
+
+// ---- Personas manuales (editable) ----
+function renderExtras(){
+  const area = document.getElementById('extrasArea');
+  if(!extras.length){ area.innerHTML = '<div class="empty">Aún no has agregado personas. Usa «+ Agregar persona».</div>'; return; }
+  const rows = extras.map(x=>`<tr>
+      <td><input class="name" data-k="${x.key}" data-f="label" value="${(x.label||'').replace(/"/g,'&quot;')}"></td>
+      <td><input class="cell" data-k="${x.key}" data-f="actual" inputmode="numeric" value="${x.actual}"></td>
+      <td><input class="cell" data-k="${x.key}" data-f="meta" inputmode="numeric" value="${x.meta}"></td>
+      <td><input class="cell" data-k="${x.key}" data-f="piso" inputmode="numeric" value="${x.piso}"></td>
+      <td><button class="rm" data-rm="${x.key}" title="Quitar">×</button></td></tr>`).join('');
+  area.innerHTML = `<div class="tblwrap"><table>
+    <thead><tr><th>Nombre</th><th>Venta actual</th><th>Meta</th><th>Piso</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+  area.querySelectorAll('input[data-f]').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const x = extras.find(e=>e.key===inp.dataset.k); if(!x)return;
+      if(inp.dataset.f==='label'){ x.label = inp.value; }
+      else { let v=parseInt(inp.value.replace(/[^\d]/g,''),10); if(isNaN(v))v=0; x[inp.dataset.f]=v; }
+      renderKPIs(); renderDetalle(); renderProy(); renderLectura(); updateCheck(); save();
+    });
+  });
+  area.querySelectorAll('button[data-rm]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      extras = extras.filter(e=>e.key!==b.dataset.rm);
+      delete reaj[b.dataset.rm];
+      renderAll(); save();
+    });
+  });
+}
+
+// ---- Proyección editable ----
+function renderProy(){
+  const body = ALL().map(g=>{
+    const r = reaj[g.key]??g.meta;
+    const fv = r-g.actual;
+    const isX = extras.includes(g);
+    return `<tr class="${isX?'extra':''}">
+      <td>${g.label}${isX?'<span class="tag">manual</span>':''}</td>
+      <td>${CLP(g.actual)}</td>
+      <td>${CLP(g.piso)}</td>
+      <td><input class="reaj" data-k="${g.key}" inputmode="numeric" value="${r}"></td>
+      <td data-fv="${g.key}">${fv>0?CLP(fv):'<span class="good">cumplido</span>'}</td></tr>`;
+  }).join('');
+  document.getElementById('proy').innerHTML =
+    `<thead><tr><th>Grupo</th><th>Venta actual</th><th>Piso</th><th>Reajuste (editable)</th><th>Falta vender</th></tr></thead><tbody>${body}</tbody>`;
+  document.querySelectorAll('input.reaj').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      let v = parseInt(inp.value.replace(/[^\d]/g,''),10); if(isNaN(v)) v=0;
+      reaj[inp.dataset.k]=v;
+      const g = ALL().find(x=>x.key===inp.dataset.k);
+      const cell = document.querySelector(`[data-fv="${inp.dataset.k}"]`);
+      const fv = v-g.actual;
+      cell.innerHTML = fv>0?CLP(fv):'<span class="good">cumplido</span>';
+      updateCheck(); save();
+    });
+  });
+}
+
+// ---- Barra de descuadre ----
+function updateCheck(){
+  const sum = ALL().reduce((a,g)=>a+(reaj[g.key]||0),0);
+  const obj = objetivo==='meta'?TOT('meta'):TOT('piso');
+  const diff = sum-obj;
+  document.getElementById('sumReaj').textContent = CLP(sum);
+  document.getElementById('objVal').textContent = CLP(obj);
+  document.getElementById('objLab').textContent = 'Objetivo · '+(objetivo==='meta'?'Meta grupal':'Piso grupal');
+  const box = document.getElementById('check'), txt = document.getElementById('statusTxt');
+  box.classList.remove('st-good','st-warn');
+  if(diff===0){ box.classList.add('st-good'); txt.className='txt'; txt.textContent='Cuadrado ✓'; }
+  else if(diff>0){ box.classList.add('st-warn'); txt.className='txt warn'; txt.textContent='Sobra '+CLP(diff)+' sobre el objetivo'; }
+  else { box.classList.add('st-warn'); txt.className='txt bad'; txt.textContent='Falta '+CLP(-diff)+' para el objetivo'; }
+}
+
+// ---- Lectura rápida ----
+function renderLectura(){
+  const A=TOT('actual'), Me=TOT('meta'), Pi=TOT('piso');
+  const list = ALL().filter(g=>g.meta>0);
+  const top = list.length? [...list].sort((a,b)=>(b.actual/b.piso)-(a.actual/a.piso))[0] : null;
+  const low = list.length? [...list].sort((a,b)=>(a.actual/a.meta)-(b.actual/b.meta))[0] : null;
+  document.getElementById('lectura').innerHTML = `<ul>
+    <li>El grupo va en <strong>${M(A)}</strong>: <strong>${(Me?A/Me*100:0).toFixed(1)}%</strong> de la meta (${M(Me)}) y <strong>${(Pi?A/Pi*100:0).toFixed(1)}%</strong> del piso (${M(Pi)}).</li>
+    <li>Faltan <strong>${CLP(Math.max(0,Me-A))}</strong> para la meta grupal y <strong>${CLP(Math.max(0,Pi-A))}</strong> para el piso grupal.</li>
+    ${top?`<li>Mejor avance vs piso: <strong>${top.label}</strong> (${(top.actual/top.piso*100).toFixed(1)}%). Más rezagado vs meta: <strong>${low.label}</strong> (${(low.actual/low.meta*100).toFixed(1)}%).</li>`:''}
+    <li>El reparto de abajo parte igualado a las metas de cada grupo (suma exacta a la meta grupal). Ajusta los montos según el ritmo real y mantén la barra en «Cuadrado».</li>
+  </ul>`;
+}
+
+function renderAll(){
+  ensureReaj();
+  document.querySelectorAll('#objseg button').forEach(x=>x.classList.toggle('on',x.dataset.obj===objetivo));
+  renderKPIs(); renderDetalle(); renderExtras(); renderProy(); renderLectura(); updateCheck();
+}
+
+// ---- controles ----
+document.getElementById('addPerson').addEventListener('click',()=>{
+  const key='x'+Date.now();
+  extras.push({key,label:'Nueva persona',actual:0,meta:0,piso:0});
+  reaj[key]=0;
+  renderAll(); save();
+  const el = document.querySelector(`#extrasArea input.name[data-k="${key}"]`); if(el){ el.focus(); el.select(); }
+});
+document.getElementById('objseg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  objetivo=b.dataset.obj;
+  document.querySelectorAll('#objseg button').forEach(x=>x.classList.toggle('on',x===b));
+  updateCheck(); save();
+});
+document.getElementById('fillMeta').addEventListener('click',()=>{ seed('meta'); renderProy(); updateCheck(); save(); });
+document.getElementById('fillPiso').addEventListener('click',()=>{ seed('piso'); renderProy(); updateCheck(); save(); });
+document.getElementById('reset').addEventListener('click',()=>{
+  try{ localStorage.removeItem(LS); }catch(e){}
+  extras=[]; reaj={}; objetivo='meta'; seed('meta'); renderAll();
+});
+
+// ---- init ----
+load(); ensureReaj(); renderAll();
+</script>
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="es">
 <head>
