@@ -150,7 +150,7 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
 const CLP = n => '$' + new Intl.NumberFormat('es-CL').format(Math.round(n||0));
 const M = n => '$' + ((n||0)/1e6).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2}) + 'M';
 
-// ---- Datos base de agosto (corte 31-ago 11:17, sin Batería Evalúa) ----
+// ---- Datos base de agosto (corte 31-ago 09:17, sin Batería Evalúa) ----
 const BASE = [
   {key:'ag', label:'Andrea · General',              actual:87966647,  meta:105610000, piso:94000000},
   {key:'aa', label:'Andrea · Asincrónicos',         actual:28544205,  meta:36305000,  piso:33000000},
@@ -225,7 +225,7 @@ function renderExtras(){
       <td><input class="cell" data-k="${x.key}" data-f="actual" inputmode="numeric" value="${x.actual}"></td>
       <td><input class="cell" data-k="${x.key}" data-f="meta" inputmode="numeric" value="${x.meta}"></td>
       <td><input class="cell" data-k="${x.key}" data-f="piso" inputmode="numeric" value="${x.piso}"></td>
-      <td><button class="rm" data-rm="${x.key}" title="Quitar">×</j-></td></tr>`).join('');
+      <td><button class="rm" data-rm="${x.key}" title="Quitar">×</button></td></tr>`).join('');
   area.innerHTML = `<div class="tblwrap"><table>
     <thead><tr><th>Nombre</th><th>Venta actual</th><th>Meta</th><th>Piso</th><th></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
@@ -234,6 +234,7 @@ function renderExtras(){
       const x = extras.find(e=>e.key===inp.dataset.k); if(!x)return;
       if(inp.dataset.f==='label'){ x.label = inp.value; }
       else { let v=parseInt(inp.value.replace(/[^\d]/g,''),10); if(isNaN(v))v=0; x[inp.dataset.f]=v; }
+      // recompute everything except the extras table (keep focus)
       renderKPIs(); renderDetalle(); renderProy(); renderLectura(); updateCheck(); save();
     });
   });
