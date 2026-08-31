@@ -1,0 +1,197 @@
+/**
+ * GET /api/ventas
+ *
+ * Devuelve los 7 grupos comerciales del mes en curso (Chile) con su venta real,
+ * leída de BigQuery, más la hora del corte del dato.
+ *
+ * Ver specs/001-ventas-bigquery/ para la definición de cada grupo y la validación.
+ *
+ * Query params:
+ *   ?mes=YYYY-MM   fuerza un mes distinto al actual (para revisar meses cerrados).
+ */
+
+const { BigQuery } = require('@google-cloud/bigquery');
+
+const PROJECT_ID = 'adipa-cl-331013';
+const TABLA = `${PROJECT_ID}.chile_ventas_produccion.datos_producto_monday_actualizada`;
+
+/** Etiquetas y orden de los grupos, tal como se ven en el dashboard. */
+const GRUPOS = [
+  ['ag', 'Andrea · General'],
+  ['aa', 'Andrea · Asincrónicos'],
+  ['si', 'Siria'],
+  ['cl', 'Claudia'],
+  ['es', 'Ada · Especializaciones'],
+  ['cu', 'Ada · Cursos'],
+  ['se', 'Ada · Sesiones magistrales'],
+];
+
+/**
+ * Metas y pisos por mes (board Monday 18425092924 "Metas semanales", item "Total"
+ * de cada grupo: meta = numeric_mktkm0m9, piso = numeric_mktk2gvz).
+ * Al empezar un mes nuevo hay que agregar su bloque acá; mientras no esté, la función
+ * usa el mes más reciente y marca `metasDesactualizadas` para que la página avise.
+ */
+const METAS_POR_MES = {
+  '2026-08': {
+    ag: { meta: 105610000, piso: 94000000 },
+    aa: { meta: 36305000, piso: 33000000 },
+    si: { meta: 102305000, piso: 102305000 },
+    cl: { meta: 31322500, piso: 29500000 },
+    es: { meta: 31305000, piso: 29000000 },
+    cu: { meta: 28152000, piso: 29000000 },
+    se: { meta: 5000000, piso: 2800000 },
+  },
+};
+
+/**
+ * Clasificación EXCLUYENTE: el orden del CASE importa (una fila cae en un solo grupo).
+ * No se usa `Modalidad` — en esta tabla no existe; los asincrónicos de Andrea son el
+ * producto sintético "Cursos Asincronicos - Chile" (SKU ASINCRONICOSCL).
+ */
+const SQL = `
+WITH base AS (
+  SELECT
+    CASE
+      WHEN Categoria_Producto = 'Especialización'                                  THEN 'es'
+      WHEN SKU LIKE 'ASINCRONICOS%'                                                THEN 'aa'
+      WHEN Seller_name = 'Andrea Sepúlveda'                                        THEN 'ag'
+      WHEN Seller_name = 'Siria Hidd'                                              THEN 'si'
+      WHEN Seller_name = 'Claudia Cárdenas'                                        THEN 'cl'
+      WHEN Seller_name = 'Ada Mendez' AND Categoria_Producto = 'Sesión Magistral'  THEN 'se'
+      WHEN Seller_name = 'Ada Mendez'
+       AND Categoria_Producto IN ('Curso Sincrónico','Curso Asincrónico')          THEN 'cu'
+      ELSE 'otros'
+    END AS grupo,
+    Venta,
+    FechaActualizacion
+  FROM \`${TABLA}\`
+  WHERE Pais = 'Chile'
+    AND Mes_Venta = DATE_TRUNC(
+          COALESCE(PARSE_DATE('%Y-%m-%d', @mes), CURRENT_DATE('America/Santiago')), MONTH)
+    AND IFNULL(Categoria_Producto, '') != 'Batería Evalúa'
+)
+SELECT grupo,
+       CAST(ROUND(SUM(Venta)) AS INT64) AS actual,
+       COUNT(*) AS filas,
+       FORMAT_DATETIME('%Y-%m-%dT%H:%M:%S', MAX(FechaActualizacion)) AS corte
+FROM base
+GROUP BY grupo
+`;
+
+/** Lee la credencial de la service account desde el entorno (o del archivo local en dev). */
+function credenciales() {
+  const bruto =
+    process.env.GCP_SERVICE_ACCOUNT_JSON ||
+    process.env.GCP_SA_KEY ||
+    process.env.GCP_SERVICE_ACCOUNT_JSON_BASE64 ||
+    process.env.GCP_SA_KEY_BASE64;
+
+  if (bruto) {
+    const texto = bruto.trim().startsWith('{')
+      ? bruto
+      : Buffer.from(bruto, 'base64').toString('utf8');
+    const llave = JSON.parse(texto);
+    return {
+      projectId: llave.project_id || PROJECT_ID,
+      credentials: { client_email: llave.client_email, private_key: llave.private_key },
+    };
+  }
+
+  // Las tres variables por separado (los saltos de línea pueden venir escapados).
+  if (process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
+    return {
+      projectId: process.env.GCP_PROJECT_ID || PROJECT_ID,
+      credentials: {
+        client_email: process.env.GCP_CLIENT_EMAIL,
+        private_key: process.env.GCP_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      },
+    };
+  }
+
+  // Desarrollo local: llave en la raíz del repo (está en .gitignore).
+  const fs = require('fs');
+  const path = require('path');
+  const archivo = path.join(process.cwd(), 'gcp-key.json');
+  if (fs.existsSync(archivo)) {
+    return { projectId: PROJECT_ID, keyFilename: archivo };
+  }
+
+  throw new Error(
+    'Falta la credencial de BigQuery: define GCP_SERVICE_ACCOUNT_JSON con el JSON ' +
+      'completo de la service account.'
+  );
+}
+
+let _bq = null;
+function bq() {
+  if (!_bq) _bq = new BigQuery(credenciales());
+  return _bq;
+}
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+/** "2026-08" -> "Agosto 2026" */
+function etiquetaMes(mes) {
+  const [anio, num] = mes.split('-');
+  return `${MESES[Number(num) - 1]} ${anio}`;
+}
+
+/** Mes en curso en hora de Santiago, como "YYYY-MM". */
+function mesActual() {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Santiago', year: 'numeric', month: '2-digit',
+  }).formatToParts(new Date());
+  const anio = partes.find((p) => p.type === 'year').value;
+  const num = partes.find((p) => p.type === 'month').value;
+  return `${anio}-${num}`;
+}
+
+module.exports = async function handler(req, res) {
+  try {
+    const pedido = typeof req.query?.mes === 'string' ? req.query.mes.trim() : '';
+    const mes = /^\d{4}-\d{2}$/.test(pedido) ? pedido : mesActual();
+
+    const [filas] = await bq().query({
+      query: SQL,
+      params: { mes: `${mes}-01` },
+      types: { mes: 'STRING' }, // OJO: con tipo DATE el parámetro no calza y devuelve 0 filas.
+    });
+
+    const porGrupo = Object.fromEntries(filas.map((f) => [f.grupo, f]));
+
+    // Si el mes en curso todavía no tiene metas cargadas, se usan las del mes más
+    // reciente disponible y se avisa (nunca inventar una meta).
+    const mesesConMeta = Object.keys(METAS_POR_MES).sort();
+    const mesMetas = METAS_POR_MES[mes] ? mes : mesesConMeta[mesesConMeta.length - 1];
+    const metas = METAS_POR_MES[mesMetas];
+
+    const grupos = GRUPOS.map(([key, label]) => ({
+      key,
+      label,
+      actual: Number(porGrupo[key]?.actual ?? 0),
+      meta: metas[key].meta,
+      piso: metas[key].piso,
+    }));
+
+    const corte = filas.map((f) => f.corte).filter(Boolean).sort().pop() || null;
+
+    // La fuente se actualiza cada hora; 5 min de caché de borde sobra y evita
+    // consultar BigQuery en cada visita.
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.status(200).json({
+      mes,
+      mesLabel: etiquetaMes(mes),
+      corte,
+      metasDesactualizadas: mesMetas !== mes,
+      mesMetas,
+      grupos,
+    });
+  } catch (e) {
+    // Nunca cachear un fallo.
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(502).json({ error: 'No se pudo leer BigQuery', detalle: String(e.message || e) });
+  }
+};

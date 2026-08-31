@@ -83,6 +83,7 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
 .lectura ul{margin:8px 0 0;padding-left:20px} .lectura li{margin:5px 0}
 .foot{color:var(--muted);font-size:12px;margin-top:26px;text-align:center}
 .empty{color:var(--muted);font-size:13px;padding:6px 2px}
+.aviso{margin-top:14px;border:1px solid var(--warn);background:var(--warn-soft);color:var(--warn);border-radius:14px;padding:11px 16px;font-size:13.2px;font-weight:600}
 
 @media(max-width:820px){ .kpis{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:520px){ .kpis{grid-template-columns:1fr} }
@@ -104,10 +105,12 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
   <header class="brandhead">
     <span class="c1"></span><span class="c2"></span>
     <img class="logo" src="data:image/png;base64,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" alt="ADIPA">
-    <h1>Estado de Ventas · Agosto 2026</h1>
+    <h1 id="tituloMes">Estado de Ventas · Agosto 2026</h1>
     <div class="sub">Grupos comerciales · comparativo contra metas y pisos de agosto (Monday)</div>
-    <span class="badge-cut">Corte 31-ago 16:17 · sin Batería Evalúa</span>
+    <span class="badge-cut" id="badgeCorte">Cargando datos de BigQuery…</span>
   </header>
+
+  <div class="aviso" id="aviso" hidden></div>
 
   <div class="kpis" id="kpis"></div>
 
@@ -154,15 +157,18 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
     <div class="lectura" id="lectura"></div>
   </section>
 
-  <div class="foot">Datos: Reportes BI ADIPA (/ventas-general) · Metas: Monday «Metas semanales - Agosto» · Total excluye categoría «Batería Evalúa».</div>
+  <div class="foot">Datos: BigQuery (ventas Chile del mes, se actualiza cada hora) · Metas: Monday «Metas semanales» · Total excluye categoría «Batería Evalúa».</div>
 </div>
 
 <script>
 const CLP = n => '$' + new Intl.NumberFormat('es-CL').format(Math.round(n||0));
 const M = n => '$' + ((n||0)/1e6).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2}) + 'M';
 
-// ---- Datos base de agosto (corte 31-ago 16:17, sin Bateria Evalua) ----
-const BASE = [
+// ---- Datos de los 7 grupos ----
+// Se llenan desde /api/ventas (BigQuery) al cargar la pagina. Estos valores son solo el
+// RESPALDO que se muestra si la primera carga falla y no hay copia guardada en el navegador
+// (corte 31-ago 16:17).
+let BASE = [
   {key:'ag', label:'Andrea · General',              actual:93712898,  meta:105610000, piso:94000000},
   {key:'aa', label:'Andrea · Asincrónicos',    actual:29894847,  meta:36305000,  piso:33000000},
   {key:'si', label:'Siria',                              actual:104176823, meta:102305000, piso:102305000},
@@ -340,7 +346,76 @@ document.getElementById('reset').addEventListener('click',()=>{
   extras=[]; reaj={}; objetivo='meta'; seed('meta'); renderAll();
 });
 
+// ---------- Datos en vivo desde BigQuery (/api/ventas) ----------
+// La fuente se actualiza cada hora, asi que la pagina se refresca sola cada 10 minutos
+// y tambien al volver a la pestaña. Lo que edita la usuaria (personas agregadas, reparto,
+// objetivo) NO se toca al refrescar.
+const CACHE_VENTAS = 'adipa-ventas-cache-v1';
+const REFRESCO_MS = 10 * 60 * 1000;
+let ultimaCarga = 0;
+
+function fmtCorte(iso){
+  if(!iso) return '';
+  const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if(!m) return String(iso);
+  const mes = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][+m[2]-1];
+  return `${+m[3]}-${mes} ${m[4]}:${m[5]}`;
+}
+
+function aplicarDatos(data, desdeCache){
+  BASE = data.grupos.map(g => ({key:g.key, label:g.label, actual:g.actual, meta:g.meta, piso:g.piso}));
+  if(data.mesLabel){
+    document.getElementById('tituloMes').textContent = 'Estado de Ventas · ' + data.mesLabel;
+    document.title = 'Estado de Ventas · ' + data.mesLabel;
+  }
+  document.getElementById('badgeCorte').textContent =
+    (data.corte ? 'Corte ' + fmtCorte(data.corte) : 'Sin hora de corte') + ' · sin Batería Evalúa';
+
+  const avisos = [];
+  if(desdeCache) avisos.push('No se pudo conectar con BigQuery: estás viendo la última copia guardada en este navegador (' + fmtCorte(data.corte) + ').');
+  if(data.metasDesactualizadas) avisos.push('Las metas y pisos que se muestran son los de ' + (data.mesMetas || 'un mes anterior') + '; falta cargar las del mes en curso.');
+  const aviso = document.getElementById('aviso');
+  aviso.innerHTML = avisos.join('<br>');
+  aviso.hidden = avisos.length === 0;
+
+  renderAll();
+}
+
+async function cargarVentas(){
+  try{
+    const r = await fetch('/api/ventas', {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if(!data || !Array.isArray(data.grupos) || !data.grupos.length) throw new Error('respuesta vacía');
+    try{ localStorage.setItem(CACHE_VENTAS, JSON.stringify(data)); }catch(e){}
+    ultimaCarga = Date.now();
+    aplicarDatos(data, false);
+  }catch(e){
+    let cache = null;
+    try{ cache = JSON.parse(localStorage.getItem(CACHE_VENTAS)||'null'); }catch(_){}
+    if(cache && Array.isArray(cache.grupos)) aplicarDatos(cache, true);
+    else {
+      document.getElementById('badgeCorte').textContent = 'Datos del 31-ago 16:17 (sin conexión)';
+      const aviso = document.getElementById('aviso');
+      aviso.textContent = 'No se pudo leer BigQuery. Estás viendo los últimos montos conocidos; recarga en un rato.';
+      aviso.hidden = false;
+      renderAll();
+    }
+  }
+}
+
+// No refrescar mientras la usuaria está escribiendo en un campo (perderia el foco).
+function refrescarSiCorresponde(){
+  const activo = document.activeElement;
+  if(activo && (activo.tagName === 'INPUT')) return;
+  if(Date.now() - ultimaCarga < 60 * 1000) return;
+  cargarVentas();
+}
+
 load(); ensureReaj(); renderAll();
+cargarVentas();
+setInterval(refrescarSiCorresponde, REFRESCO_MS);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refrescarSiCorresponde(); });
 </script>
 </body>
 </html>
