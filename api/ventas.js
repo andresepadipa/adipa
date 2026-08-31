@@ -45,6 +45,29 @@ const METAS_POR_MES = {
 };
 
 /**
+ * Ajustes manuales por mes.
+ *
+ * Son ventas reales que el BI ya muestra pero que todavía no llegan a la tabla de BigQuery
+ * que leemos. Se suman al grupo indicado y la página lo declara en pantalla: el total nunca
+ * incluye un monto a mano sin decirlo.
+ *
+ * `productoId` es la salvaguarda: si la tabla EMPIEZA a traer ventas de ese producto, el
+ * ajuste se desactiva solo para no contar la venta dos veces.
+ */
+const AJUSTES_POR_MES = {
+  '2026-08': [
+    {
+      key: 'es',
+      monto: 584100,
+      productoId: 1097431,
+      motivo:
+        'Preventa de la Especialización de Salud Mental en APS. El producto lanza el 27-nov, ' +
+        'así que la tabla de ventas todavía no le asocia montos; el BI sí los ve.',
+    },
+  ],
+};
+
+/**
  * Clasificación EXCLUYENTE: el orden del CASE importa (una fila cae en un solo grupo).
  * No se usa `Modalidad` — en esta tabla no existe; los asincrónicos de Andrea son el
  * producto sintético "Cursos Asincronicos - Chile" (SKU ASINCRONICOSCL).
@@ -88,6 +111,18 @@ SELECT grupo,
        FORMAT_DATETIME('%Y-%m-%dT%H:%M:%S', MAX(FechaActualizacion)) AS corte
 FROM base
 GROUP BY grupo
+
+UNION ALL
+
+-- Salvaguarda: cuánto trae la tabla para los productos que tienen ajuste manual.
+-- Si deja de ser 0, el ajuste se descarta en el handler.
+SELECT CONCAT('producto:', CAST(CAST(Product_id AS INT64) AS STRING)),
+       CAST(ROUND(SUM(IFNULL(Venta, 0))) AS INT64),
+       COUNT(*),
+       NULL
+FROM filas
+WHERE CAST(Product_id AS INT64) IN UNNEST(@productosAjustados)
+GROUP BY 1
 `;
 
 /**
@@ -182,10 +217,15 @@ module.exports = async function handler(req, res) {
     const pedido = typeof req.query?.mes === 'string' ? req.query.mes.trim() : '';
     const mes = /^\d{4}-\d{2}$/.test(pedido) ? pedido : mesActual();
 
+    const ajustes = AJUSTES_POR_MES[mes] || [];
+
     const [filas] = await bq().query({
       query: SQL,
-      params: { mes: `${mes}-01` },
-      types: { mes: 'STRING' }, // OJO: con tipo DATE el parámetro no calza y devuelve 0 filas.
+      params: {
+        mes: `${mes}-01`,
+        productosAjustados: ajustes.map((a) => a.productoId),
+      },
+      types: { mes: 'STRING', productosAjustados: ['INT64'] }, // OJO: con tipo DATE el mes no calza y devuelve 0 filas.
     });
 
     const porGrupo = Object.fromEntries(filas.map((f) => [f.grupo, f]));
@@ -204,6 +244,18 @@ module.exports = async function handler(req, res) {
       piso: metas[key].piso,
     }));
 
+    // Ajustes manuales: se suman al grupo, salvo que la tabla ya traiga ventas de ese
+    // producto (ahí el dato real manda y el ajuste se descarta para no duplicar).
+    const ajustesAplicados = [];
+    for (const a of ajustes) {
+      const yaEnDatos = Number(porGrupo[`producto:${a.productoId}`]?.actual ?? 0);
+      if (yaEnDatos > 0) continue;
+      const grupo = grupos.find((g) => g.key === a.key);
+      if (!grupo) continue;
+      grupo.actual += a.monto;
+      ajustesAplicados.push({ key: a.key, label: grupo.label, monto: a.monto, motivo: a.motivo });
+    }
+
     const corte = filas.map((f) => f.corte).filter(Boolean).sort().pop() || null;
 
     // La fuente se actualiza cada hora; 5 min de caché de borde sobra y evita
@@ -216,6 +268,7 @@ module.exports = async function handler(req, res) {
       corte,
       metasDesactualizadas: mesMetas !== mes,
       mesMetas,
+      ajustes: ajustesAplicados,
       grupos,
     });
   } catch (e) {

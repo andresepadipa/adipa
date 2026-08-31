@@ -71,6 +71,21 @@ salvo `es`, que va $584.100 abajo porque la Especialización APS de Ada Mendez
 **Decisión de Andrea: BigQuery es la fuente de verdad**; el monto aparecerá solo cuando
 el ETL lo ingiera.
 
+## Ajustes manuales
+Ventas que el BI ya muestra y esta tabla todavía no. Se declaran en `AJUSTES_POR_MES`
+(`api/ventas.js`) con monto, motivo y `productoId`, se suman al grupo y **la página lo dice
+en pantalla** — el total nunca lleva un monto a mano en silencio.
+
+- **ago-2026 · `es` · $584.100** — preventa de la Especialización de Salud Mental en APS
+  (`Product_id 1097431`). El producto lanza el 27-nov, así que la tabla no le asocia montos.
+
+**Salvaguarda:** la query devuelve también cuánto trae la tabla para cada `productoId` con
+ajuste. Si deja de ser 0, el ajuste se descarta solo y manda el dato real — así la venta no
+se cuenta dos veces cuando el ETL la tome.
+
+**Al cerrar el mes o cuando el dato llegue, revisar esta lista.** Un ajuste que sobrevive a
+su motivo es un número quemado con otro nombre.
+
 ## Fuera de alcance
 - Leer metas desde Monday en vivo (hoy hardcodeadas por mes).
 - Países distintos de Chile.

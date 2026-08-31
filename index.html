@@ -84,6 +84,8 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
 .foot{color:var(--muted);font-size:12px;margin-top:26px;text-align:center}
 .empty{color:var(--muted);font-size:13px;padding:6px 2px}
 .aviso{margin-top:14px;border:1px solid var(--warn);background:var(--warn-soft);color:var(--warn);border-radius:14px;padding:11px 16px;font-size:13.2px;font-weight:600}
+.aviso.info{border-color:var(--accent-2);background:var(--celeste-soft);color:var(--ink);font-weight:500}
+.aviso.info b{font-weight:700}
 
 @media(max-width:820px){ .kpis{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:520px){ .kpis{grid-template-columns:1fr} }
@@ -111,6 +113,7 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
   </header>
 
   <div class="aviso" id="aviso" hidden></div>
+  <div class="aviso info" id="nota" hidden></div>
 
   <div class="kpis" id="kpis"></div>
 
@@ -377,6 +380,15 @@ function aplicarDatos(data, desdeCache){
   const aviso = document.getElementById('aviso');
   aviso.innerHTML = avisos.join('<br>');
   aviso.hidden = avisos.length === 0;
+
+  // Ajustes manuales: ventas que el BI ya muestra y BigQuery todavía no. Van sumadas
+  // en el total, pero declaradas acá para que nadie las confunda con dato de BigQuery.
+  const ajustes = Array.isArray(data.ajustes) ? data.ajustes : [];
+  const nota = document.getElementById('nota');
+  nota.innerHTML = ajustes.map(a =>
+    'El total de <b>' + a.label + '</b> incluye un ajuste manual de <b>' + CLP(a.monto) + '</b>. ' + a.motivo
+  ).join('<br>');
+  nota.hidden = ajustes.length === 0;
 
   renderAll();
 }
