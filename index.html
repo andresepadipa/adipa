@@ -95,7 +95,7 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
   <header class="top">
     <h1>Estado de Ventas · Agosto 2026</h1>
     <div class="sub">ADIPA · grupos comerciales · comparativo contra metas y pisos de agosto (Monday)</div>
-    <span class="badge-cut">Corte 31-ago 13:17 · sin Batería Evalúa</span>
+    <span class="badge-cut">Corte 31-ago 14:17 · sin Batería Evalúa</span>
   </header>
 
   <div class="kpis" id="kpis"></div>
@@ -152,13 +152,13 @@ const M = n => '$' + ((n||0)/1e6).toLocaleString('es-CL',{minimumFractionDigits:
 
 // ---- Datos base de agosto (corte 31-ago 09:17, sin Batería Evalúa) ----
 const BASE = [
-  {key:'ag', label:'Andrea · General',              actual:90844647,  meta:105610000, piso:94000000},
-  {key:'aa', label:'Andrea · Asincrónicos',         actual:28935985,  meta:36305000,  piso:33000000},
+  {key:'ag', label:'Andrea · General',              actual:91558697,  meta:105610000, piso:94000000},
+  {key:'aa', label:'Andrea · Asincrónicos',         actual:29205426,  meta:36305000,  piso:33000000},
   {key:'si', label:'Siria',                          actual:102812822, meta:102305000, piso:102305000},
-  {key:'cl', label:'Claudia',                        actual:28016454,  meta:31322500,  piso:29500000},
-  {key:'es', label:'Ada · Especializaciones',        actual:24419426,  meta:31305000,  piso:29000000},
-  {key:'cu', label:'Ada · Cursos',                   actual:28299860,  meta:28152000,  piso:29000000},
-  {key:'se', label:'Ada · Sesiones magistrales',     actual:2816564,   meta:5000000,   piso:2800000},
+  {key:'cl', label:'Claudia',                        actual:28189384,  meta:31322500,  piso:29500000},
+  {key:'es', label:'Ada · Especializaciones',        actual:24799426,  meta:31305000,  piso:29000000},
+  {key:'cu', label:'Ada · Cursos',                   actual:28411820,  meta:28152000,  piso:29000000},
+  {key:'se', label:'Ada · Sesiones magistrales',     actual:2878544,   meta:5000000,   piso:2800000},
 ];
 
 let extras = [];          // {key,label,actual,meta,piso}  (personas manuales)
