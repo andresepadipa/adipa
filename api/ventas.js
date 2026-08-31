@@ -79,26 +79,43 @@ FROM base
 GROUP BY grupo
 `;
 
-/** Lee la credencial de la service account desde el entorno (o del archivo local en dev). */
+/**
+ * Lee la credencial de la service account desde el entorno (o del archivo local en dev).
+ *
+ * Prueba todas las variables posibles y se queda con la PRIMERA que parsee bien: si alguien
+ * pega el JSON cortado en el panel de Vercel, se salta esa y sigue con la siguiente en vez
+ * de caerse. Acepta el JSON tal cual o en base64 (una sola linea, a prueba de pegados).
+ */
 function credenciales() {
-  const bruto =
-    process.env.GCP_SERVICE_ACCOUNT_JSON ||
-    process.env.GCP_SA_KEY ||
-    process.env.GCP_SERVICE_ACCOUNT_JSON_BASE64 ||
-    process.env.GCP_SA_KEY_BASE64;
+  const CANDIDATAS = [
+    'GCP_SERVICE_ACCOUNT_JSON',
+    'GCP_SA_KEY',
+    'GCP_SERVICE_ACCOUNT_JSON_BASE64',
+    'GCP_SA_KEY_BASE64',
+  ];
+  const problemas = [];
 
-  if (bruto) {
-    const texto = bruto.trim().startsWith('{')
-      ? bruto
-      : Buffer.from(bruto, 'base64').toString('utf8');
-    const llave = JSON.parse(texto);
-    return {
-      projectId: llave.project_id || PROJECT_ID,
-      credentials: { client_email: llave.client_email, private_key: llave.private_key },
-    };
+  for (const nombre of CANDIDATAS) {
+    const bruto = process.env[nombre];
+    if (!bruto || !bruto.trim()) continue;
+    try {
+      const texto = bruto.trim().startsWith('{')
+        ? bruto
+        : Buffer.from(bruto, 'base64').toString('utf8');
+      const llave = JSON.parse(texto);
+      if (!llave.client_email || !llave.private_key) {
+        throw new Error('le faltan client_email o private_key');
+      }
+      return {
+        projectId: llave.project_id || PROJECT_ID,
+        credentials: { client_email: llave.client_email, private_key: llave.private_key },
+      };
+    } catch (e) {
+      problemas.push(nombre + ': ' + e.message);
+    }
   }
 
-  // Las tres variables por separado (los saltos de línea pueden venir escapados).
+  // Las tres variables por separado (los saltos de linea pueden venir escapados).
   if (process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
     return {
       projectId: process.env.GCP_PROJECT_ID || PROJECT_ID,
@@ -109,7 +126,7 @@ function credenciales() {
     };
   }
 
-  // Desarrollo local: llave en la raíz del repo (está en .gitignore).
+  // Desarrollo local: llave en la raiz del repo (esta en .gitignore).
   const fs = require('fs');
   const path = require('path');
   const archivo = path.join(process.cwd(), 'gcp-key.json');
@@ -118,8 +135,9 @@ function credenciales() {
   }
 
   throw new Error(
-    'Falta la credencial de BigQuery: define GCP_SERVICE_ACCOUNT_JSON con el JSON ' +
-      'completo de la service account.'
+    problemas.length
+      ? 'La credencial de BigQuery esta mal cargada -> ' + problemas.join(' | ')
+      : 'Falta la credencial de BigQuery: define GCP_SERVICE_ACCOUNT_JSON (o GCP_SA_KEY_BASE64).'
   );
 }
 
