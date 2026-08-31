@@ -34,6 +34,25 @@ Filtros globales: `Pais = 'Chile'`, `Mes_Venta` = mes en curso, monto = `Venta` 
 La clasificación es **excluyente** (un `CASE` en ese orden): cada fila cae en un solo
 grupo. Lo que no calza queda en `otros` y no se muestra (hoy: $1.151 de Alejandra Catalán).
 
+### Deduplicación por versión (obligatoria)
+La tabla repite el mismo producto en varias filas, una por versión, y hay **dos casos
+distintos** que se comportan al revés:
+
+- **Mismo monto repetido** = la misma venta duplicada → cuenta **una vez**.
+  Ej. ago-2026: *Sesión Magistral de Irvin Yalom* (`Product_id 744749`), versiones 1 y 2,
+  ambas con $195.960 y 6 matrículas.
+- **Montos distintos** = versiones con ventas propias → **se suman**.
+  Ej. *Acreditación Oficial Clínica Internacional ADOS* de Siria (v21 $20.115.937 + v22
+  $6.363.328) y el *WISC-V* de Andrea (v32 $2.012.000 + v33 $6.906.422).
+
+Se resuelve agrupando por `(Product_id, Seller_name, Categoria_Producto, SKU, Venta)` antes
+de clasificar: colapsa los montos repetidos y conserva los distintos. Pasa 1 a 3 veces por
+mes, todos los meses — no es un caso aislado.
+
+**Validado contra el BI** (Reporte de Ventas General, Ada Mendez · Sesión Magistral · Chile ·
+CLP · 01-08 a 31-08): con deduplicación `se` da **$2.938.524**, idéntico al BI; sin ella daba
+$3.134.484. Ningún otro grupo cambia.
+
 ### Hallazgos que cambian el brief original
 - **No se usa `Modalidad`.** Esa columna vive en otra tabla. En BigQuery los asincrónicos
   de Andrea son un producto sintético *"Cursos Asincronicos - Chile"* (`SKU ASINCRONICOSCL`)

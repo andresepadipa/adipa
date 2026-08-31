@@ -50,7 +50,22 @@ const METAS_POR_MES = {
  * producto sintético "Cursos Asincronicos - Chile" (SKU ASINCRONICOSCL).
  */
 const SQL = `
-WITH base AS (
+-- Paso 1: una fila por producto y MONTO distinto.
+-- La tabla repite el mismo producto en varias versiones. Cuando el monto se repite es la
+-- MISMA venta duplicada (ej. Sesión Magistral de Irvin Yalom, v1 y v2 con $195.960 cada una)
+-- y hay que contarla una vez; cuando los montos diferen son versiones con ventas propias
+-- (ej. Acreditación ADOS de Siria) y sí se suman. Agrupar por monto resuelve los dos casos.
+WITH filas AS (
+  SELECT Product_id, Seller_name, Categoria_Producto, SKU, Venta,
+         MAX(FechaActualizacion) AS FechaActualizacion
+  FROM \`${TABLA}\`
+  WHERE Pais = 'Chile'
+    AND Mes_Venta = DATE_TRUNC(
+          COALESCE(PARSE_DATE('%Y-%m-%d', @mes), CURRENT_DATE('America/Santiago')), MONTH)
+    AND IFNULL(Categoria_Producto, '') != 'Batería Evalúa'
+  GROUP BY Product_id, Seller_name, Categoria_Producto, SKU, Venta
+),
+base AS (
   SELECT
     CASE
       WHEN Categoria_Producto = 'Especialización'                                  THEN 'es'
@@ -65,11 +80,7 @@ WITH base AS (
     END AS grupo,
     Venta,
     FechaActualizacion
-  FROM \`${TABLA}\`
-  WHERE Pais = 'Chile'
-    AND Mes_Venta = DATE_TRUNC(
-          COALESCE(PARSE_DATE('%Y-%m-%d', @mes), CURRENT_DATE('America/Santiago')), MONTH)
-    AND IFNULL(Categoria_Producto, '') != 'Batería Evalúa'
+  FROM filas
 )
 SELECT grupo,
        CAST(ROUND(SUM(Venta)) AS INT64) AS actual,
