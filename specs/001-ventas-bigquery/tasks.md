@@ -32,5 +32,14 @@
   quedó con el valor cortado y se puede borrar.
 
 ## Pendiente al cambiar de mes
-- Agregar el bloque del mes nuevo a `METAS_POR_MES` en `api/ventas.js` (board Monday
-  18425092924). Mientras no esté, la página avisa que las metas son de un mes anterior.
+La vista está **fijada en agosto 2026** (`MES_FIJO = '2026-08'` en `api/ventas.js`), por
+pedido de Andrea: no debe saltar sola a septiembre el 1-sep. Cuando ella avise, para pasar
+el dashboard a septiembre hay que hacer las dos cosas juntas:
+
+1. Cargar el bloque `'2026-09'` en `METAS_POR_MES` con las metas y pisos del board de Monday
+   18425092924 (item "Total" de cada grupo: meta `numeric_mktkm0m9`, piso `numeric_mktk2gvz`).
+2. Poner `MES_FIJO = null` para que vuelva a seguir el mes en curso.
+
+Revisar también `AJUSTES_POR_MES`: el ajuste de la preventa APS es de agosto y no se arrastra.
+
+Mientras tanto, `/api/ventas?mes=2026-09` permite mirar septiembre sin cambiar nada.

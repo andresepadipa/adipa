@@ -45,6 +45,17 @@ const METAS_POR_MES = {
 };
 
 /**
+ * Mes que muestra el dashboard.
+ *
+ *   null       → sigue el mes en curso (hora de Santiago).
+ *   'YYYY-MM'  → lo fija en ese mes, pase lo que pase con la fecha.
+ *
+ * Andrea pidió mantener la vista en AGOSTO 2026 hasta tener las metas de septiembre.
+ * Para pasar a septiembre: cargar su bloque en METAS_POR_MES y poner esto en null.
+ */
+const MES_FIJO = '2026-08';
+
+/**
  * Ajustes manuales por mes.
  *
  * Son ventas reales que el BI ya muestra pero que todavía no llegan a la tabla de BigQuery
@@ -215,7 +226,7 @@ function mesActual() {
 module.exports = async function handler(req, res) {
   try {
     const pedido = typeof req.query?.mes === 'string' ? req.query.mes.trim() : '';
-    const mes = /^\d{4}-\d{2}$/.test(pedido) ? pedido : mesActual();
+    const mes = /^\d{4}-\d{2}$/.test(pedido) ? pedido : (MES_FIJO || mesActual());
 
     const ajustes = AJUSTES_POR_MES[mes] || [];
 
