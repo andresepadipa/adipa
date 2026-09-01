@@ -258,9 +258,11 @@ module.exports = async function handler(req, res) {
 
     const corte = filas.map((f) => f.corte).filter(Boolean).sort().pop() || null;
 
-    // La fuente se actualiza cada hora; 5 min de caché de borde sobra y evita
-    // consultar BigQuery en cada visita.
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+    // 60 s de caché de borde: suficiente para no consultar BigQuery en cada visita y
+    // lo bastante corto para que nadie vea un dato viejo.
+    // SIN stale-while-revalidate a propósito: con SWR, Vercel entregaba la copia vencida
+    // y recién después buscaba la nueva, así que se llegaban a servir cortes de hace una hora.
+    res.setHeader('Cache-Control', 's-maxage=60');
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.status(200).json({
       mes,

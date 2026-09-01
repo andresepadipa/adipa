@@ -400,11 +400,11 @@ document.getElementById('reset').addEventListener('click',()=>{
 });
 
 // ---------- Datos en vivo desde BigQuery (/api/ventas) ----------
-// La fuente se actualiza cada hora, asi que la pagina se refresca sola cada 10 minutos
+// La fuente se actualiza cada hora, asi que la pagina se refresca sola cada 5 minutos
 // y tambien al volver a la pestaña. Lo que edita la usuaria (personas agregadas, reparto,
 // objetivo) NO se toca al refrescar.
 const CACHE_VENTAS = 'adipa-ventas-cache-v1';
-const REFRESCO_MS = 10 * 60 * 1000;
+const REFRESCO_MS = 5 * 60 * 1000;
 let ultimaCarga = 0;
 
 function fmtCorte(iso){
