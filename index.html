@@ -57,6 +57,8 @@ input.reaj{width:130px}
 input.cell{width:120px}
 input.name{width:170px;text-align:left;font:inherit;font-weight:600;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#fbfaff;color:var(--ink)}
 input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:#fff}
+input.reaj.bajo{border-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.hintbajo{margin:10px 0 0;font-size:13px;color:var(--warn);font-weight:600}
 .rm{border:1px solid var(--line);background:var(--card);color:var(--bad);border-radius:9px;width:30px;height:30px;font-size:16px;line-height:1;cursor:pointer}
 .rm:hover{border-color:var(--bad);background:var(--bad-soft)}
 
@@ -142,12 +144,14 @@ input.cell:focus,input.reaj:focus,input.name:focus{outline:none;border-color:var
       </div>
       <button class="btn" id="fillMeta">Igualar a metas</button>
       <button class="btn" id="fillPiso">Igualar a pisos</button>
+      <button class="btn" id="fillVendido">Subir a lo ya vendido</button>
       <button class="btn" id="addPersonProy">+ Agregar persona</button>
       <button class="btn primary" id="saveReparto">Guardar reparto</button>
       <button class="btn" id="reset">Restablecer</button>
       <span id="savedMsg" class="savedmsg"></span>
     </div>
     <div class="tblwrap"><table id="proy"></table></div>
+    <p class="hintbajo" id="hintBajo" hidden></p>
     <div class="checkbar" id="check">
       <div><div class="lab">Suma de reajustes</div><div class="big" id="sumReaj">—</div></div>
       <div><div class="lab" id="objLab">Objetivo · Meta grupal</div><div class="big" id="objVal">—</div></div>
@@ -279,7 +283,7 @@ function renderProy(){
      <tbody>${body}
      <tr class="total"><td>GRUPO</td>
        <td id="ptActual">—</td><td id="ptPiso">—</td><td id="ptReaj">—</td><td id="ptFalta">—</td></tr></tbody>`;
-  updateProyTotals();
+  updateProyTotals(); updateBajos();
   document.querySelectorAll('input.reaj').forEach(inp=>{
     inp.addEventListener('input',()=>{
       let v = parseInt(inp.value.replace(/[^\d]/g,''),10); if(isNaN(v)) v=0;
@@ -288,13 +292,36 @@ function renderProy(){
       const cell = document.querySelector(`[data-fv="${inp.dataset.k}"]`);
       const fv = v-g.actual;
       cell.innerHTML = fv>0?CLP(fv):'<span class="good">cumplido</span>';
-      updateProyTotals(); updateCheck(); save();
+      updateProyTotals(); updateBajos(); updateCheck(); save();
     });
   });
 }
 
 // Totales de la tabla de proyección. "Falta vender" suma solo los montos que faltan:
 // los grupos ya cumplidos aportan 0, no restan, para no esconder lo que queda por vender.
+// Un reajuste menor a la venta ya realizada significa que el plan pide MENOS de lo que esa
+// persona ya vendió. Se marca, porque además hace que "venta actual + falta vender" no calce
+// con la suma de reajustes: la diferencia es justo ese excedente.
+function updateBajos(){
+  let cuantos = 0, exceso = 0;
+  ALL().forEach(g=>{
+    const r = +reaj[g.key]||0, a = +g.actual||0;
+    const bajo = r < a;
+    if(bajo){ cuantos++; exceso += a - r; }
+    const inp = document.querySelector(`input.reaj[data-k="${g.key}"]`);
+    if(inp) inp.classList.toggle('bajo', bajo);
+  });
+  const h = document.getElementById('hintBajo');
+  if(!h) return;
+  h.hidden = cuantos === 0;
+  if(cuantos) h.textContent = (cuantos === 1
+    ? '1 grupo tiene un reajuste menor a lo que ya vendió'
+    : cuantos + ' grupos tienen un reajuste menor a lo que ya vendieron')
+    + ' (' + CLP(exceso) + ' de diferencia): el plan pide menos de lo que ya está vendido, '
+    + 'y por eso «venta actual + falta vender» no cuadra con la suma de reajustes. '
+    + 'Usa «Subir a lo ya vendido» para corregirlo.';
+}
+
 function updateProyTotals(){
   const filas = ALL();
   const act = filas.reduce((a,g)=>a+(+g.actual||0),0);
@@ -362,6 +389,11 @@ document.getElementById('saveReparto').addEventListener('click',()=>{
 });
 document.getElementById('fillMeta').addEventListener('click',()=>{ seed('meta'); renderProy(); updateCheck(); save(); });
 document.getElementById('fillPiso').addEventListener('click',()=>{ seed('piso'); renderProy(); updateCheck(); save(); });
+document.getElementById('fillVendido').addEventListener('click',()=>{
+  // Sube solo a los que van por debajo de su venta real; a nadie le baja el reajuste.
+  ALL().forEach(g=>{ if((+reaj[g.key]||0) < (+g.actual||0)) reaj[g.key] = +g.actual||0; });
+  renderProy(); updateCheck(); save();
+});
 document.getElementById('reset').addEventListener('click',()=>{
   try{ localStorage.removeItem(LS); }catch(e){}
   extras=[]; reaj={}; objetivo='meta'; seed('meta'); renderAll();

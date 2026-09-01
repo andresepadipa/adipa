@@ -17,7 +17,13 @@ reflejar ese ritmo sin intervención.
    reajuste y **falta vender**. El total de "falta vender" suma solo lo que falta: los grupos
    ya cumplidos aportan 0, no restan, para no esconder lo que queda por vender. Se recalcula
    al editar cualquier reajuste.
-4. Todo lo demás sigue igual: tabla editable, "+ Agregar persona", proyección/reparto
+4. Si un reajuste queda **por debajo de la venta ya realizada** de ese grupo, el campo se
+   marca en naranja y aparece un aviso con la diferencia. Es la causa de que
+   "venta actual + falta vender" no cuadre con la suma de reajustes: las filas que dicen
+   *cumplido* aportan $0 a "falta vender", pero su venta real sí entra en "venta actual",
+   así que el excedente descuadra la cuenta. El botón **«Subir a lo ya vendido»** sube esos
+   reajustes al monto ya vendido (nunca baja ninguno) y con eso la igualdad se cumple exacta.
+5. Todo lo demás sigue igual: tabla editable, "+ Agregar persona", proyección/reparto
    con aviso de descuadre, "Guardar reparto", toggle Meta/Piso, `localStorage`
    (`adipa-agosto-v2`).
 
