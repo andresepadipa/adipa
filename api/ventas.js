@@ -39,7 +39,7 @@ const METAS_POR_MES = {
     si: { meta: 102305000, piso: 102305000 },
     cl: { meta: 31322500, piso: 29500000 },
     es: { meta: 31305000, piso: 29000000 },
-    cu: { meta: 28152000, piso: 29000000 },
+    cu: { meta: 28152500, piso: 29000000 },
     se: { meta: 5000000, piso: 2800000 },
   },
 };

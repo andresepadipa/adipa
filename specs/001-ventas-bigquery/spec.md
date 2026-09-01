@@ -38,7 +38,7 @@ Filtros globales: `Pais = 'Chile'`, `Mes_Venta` = mes en curso, monto = `Venta` 
 | `si` | Siria | `Seller_name = 'Siria Hidd'` | 102.305.000 | 102.305.000 |
 | `cl` | Claudia | `Seller_name = 'Claudia Cárdenas'` | 31.322.500 | 29.500.000 |
 | `es` | Ada · Especializaciones | `Categoria_Producto = 'Especialización'` | 31.305.000 | 29.000.000 |
-| `cu` | Ada · Cursos | `'Ada Mendez'` + Curso Sincrónico/Asincrónico | 28.152.000 | 29.000.000 |
+| `cu` | Ada · Cursos | `'Ada Mendez'` + Curso Sincrónico/Asincrónico | 28.152.500 | 29.000.000 |
 | `se` | Ada · Sesiones magistrales | `'Ada Mendez'` + `'Sesión Magistral'` | 5.000.000 | 2.800.000 |
 
 La clasificación es **excluyente** (un `CASE` en ese orden): cada fila cae en un solo
